@@ -1,0 +1,215 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "unit_id": "G01",
+        "elderly_population": 75,
+        "total_population": 310
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.32,
+              39.88
+            ],
+            [
+              116.329,
+              39.88
+            ],
+            [
+              116.329,
+              39.889
+            ],
+            [
+              116.32,
+              39.889
+            ],
+            [
+              116.32,
+              39.88
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "unit_id": "G02",
+        "elderly_population": 110,
+        "total_population": 450
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.329,
+              39.88
+            ],
+            [
+              116.338,
+              39.88
+            ],
+            [
+              116.338,
+              39.889
+            ],
+            [
+              116.329,
+              39.889
+            ],
+            [
+              116.329,
+              39.88
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "unit_id": "G03",
+        "elderly_population": 50,
+        "total_population": 260
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.338,
+              39.88
+            ],
+            [
+              116.347,
+              39.88
+            ],
+            [
+              116.347,
+              39.889
+            ],
+            [
+              116.338,
+              39.889
+            ],
+            [
+              116.338,
+              39.88
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "unit_id": "G04",
+        "elderly_population": 125,
+        "total_population": 500
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.32,
+              39.889
+            ],
+            [
+              116.329,
+              39.889
+            ],
+            [
+              116.329,
+              39.898
+            ],
+            [
+              116.32,
+              39.898
+            ],
+            [
+              116.32,
+              39.889
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "unit_id": "G05",
+        "elderly_population": 90,
+        "total_population": 390
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.329,
+              39.889
+            ],
+            [
+              116.338,
+              39.889
+            ],
+            [
+              116.338,
+              39.898
+            ],
+            [
+              116.329,
+              39.898
+            ],
+            [
+              116.329,
+              39.889
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "unit_id": "G06",
+        "elderly_population": 65,
+        "total_population": 330
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.338,
+              39.889
+            ],
+            [
+              116.347,
+              39.889
+            ],
+            [
+              116.347,
+              39.898
+            ],
+            [
+              116.338,
+              39.898
+            ],
+            [
+              116.338,
+              39.889
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}
