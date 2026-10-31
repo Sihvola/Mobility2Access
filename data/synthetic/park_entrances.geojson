@@ -1,0 +1,10 @@
+{
+"type": "FeatureCollection",
+"name": "park_entrances",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "park_id": "P01" }, "geometry": { "type": "Point", "coordinates": [ 116.326849098189797, 39.88501074722793 ] } },
+{ "type": "Feature", "properties": { "park_id": "P02" }, "geometry": { "type": "Point", "coordinates": [ 116.340459857901905, 39.895019728369249 ] } },
+{ "type": "Feature", "properties": { "park_id": "P03" }, "geometry": { "type": "Point", "coordinates": [ 116.347405582042029, 39.886036220778259 ] } }
+]
+}
