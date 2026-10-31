@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mobility2access"
+version = "0.1.0"
+description = "Behavior-informed Gaussian 2SFCA park accessibility and spatial equity analysis"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["numpy>=1.23", "pandas>=1.5"]
+authors = [{name = "Mobility2Access contributors"}]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Topic :: Scientific/Engineering :: GIS",
+]
+[project.optional-dependencies]
+gis = ["geopandas>=0.14"]
+test = ["pytest>=7"]
+[project.scripts]
+mobility2access = "mobility2access.cli:main"
+[tool.setuptools.packages.find]
+where = ["src"]
+[tool.pytest.ini_options]
+testpaths = ["tests"]
