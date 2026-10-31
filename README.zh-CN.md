@@ -97,9 +97,21 @@ A_i = sum_j(R_j * w_ij)
 - 已有距离阈值时**不需要**原始手机信令数据。`calibrate_thresholds()` 可利用提取后的公园访问路网距离表计算75%分位数，但**不直接提供**用户居住地识别、轨迹提取与公园访问识别模块。
 - 当前实现是核心 Gaussian 2SFCA + 阈值管理 + 人口加权 Gini；不包含论文全部回归分析或与原数据结果的逐项检验。
 - 使用不同人口与单元划分时，保证人口、路网距离及输出单元 ID 一致。公园实际入口及研究单元出发位置会影响距离结果。
-- 项目未添加 LICENSE。公开发布前请确认代码授权、合作单位权利，并添加引用文件。
+- 项目源代码已采用 [BSD-3-Clause 开源许可证](LICENSE)，软件引用信息见 [CITATION.cff](CITATION.cff)。该许可证不改变2019年论文和第三方地图数据的版权及许可条件。
 
 更完整的算法与不确定性说明：[docs/METHOD.md](docs/METHOD.md)，字段说明：[docs/DATA_FORMAT.md](docs/DATA_FORMAT.md)。
+
+## 软件授权、学术引用和 OpenStreetMap 声明
+
+**开源授权：** Mobility2Access 的原创软件代码采用 [BSD 3-Clause License](LICENSE)，版权声明为 © 2026 Sihui Guo and Mobility2Access contributors。许可证适用于软件代码，不自动覆盖论文全文、合作单位数据或者其他第三方数据。
+
+**学术引用：** 仓库根目录的 [CITATION.cff](CITATION.cff) 用于引用 **Mobility2Access v0.2.0 软件**；如果采用论文提出的基于年龄与公园规模的出行距离阈值方法，也请同时引用原论文：
+
+> Guo, S., Song, C., Pei, T., et al. (2019). *Accessibility to urban parks for elderly residents: Perspectives from mobile phone data*. Landscape and Urban Planning, 191, 103642. https://doi.org/10.1016/j.landurbplan.2019.103642
+
+目前软件尚没有独立的 Zenodo DOI 或正式 GitHub Release，**原论文 DOI 不代表软件 DOI**。
+
+**OSM 数据声明：** 使用在线路网功能时，数据来源于 **© OpenStreetMap contributors**，按 [Open Database License (ODbL)](https://www.openstreetmap.org/copyright) 授权。公开发布基于 OSM 的路网数据、地图和衍生成果时，应遵守 [OpenStreetMap 署名指南](https://osmfoundation.org/wiki/Attribution_Guidelines) 以及相关许可要求。软件采用 BSD-3-Clause，不意味着 OSM 数据自动采用 BSD。仓库自带示例空间数据为合成数据，不包含在线下载的 OSM 路网。
 
 ## v0.2：从空间数据自动计算路网距离
 
