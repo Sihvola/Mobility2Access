@@ -1,39 +1,45 @@
-# Mobility2Access：基于出行行为的空间可达性分析
+# Mobility2Access：Python 复现与扩展
 
-[English README](README.md)
+论文来源：Guo et al. (2019), *Accessibility to urban parks for elderly residents: Perspectives from mobile phone data*, Landscape and Urban Planning 191, 103642. https://doi.org/10.1016/j.landurbplan.2019.103642
 
-这是一个 Python 科研原型，实现基于高斯距离衰减的两步移动搜索法（Gaussian 2SFCA）和人口加权的 Gini / Lorenz 公平性分析。研究特色是**依据观测到的公园访问出行行为，按年龄和公园规模设置服务距离阈值**。
+本项目是**可运行的论文核心算法 Python 重构**，不是原始北京数据的完整数值复现。核心理念是：利用真实居民访问公园的出行距离（按年龄及公园规模分组）的 **75% 分位数**确定服务距离阈值，再使用 Gaussian 2SFCA 计算公园可达性，并分析公平性。Gaussian 2SFCA、基尼系数均为成熟方法；论文特色是基于实际出行行为确定差异化阈值。
 
-**论文**：Guo, S., Song, C., Pei, T., et al. (2019). *Accessibility to urban parks for elderly residents: Perspectives from mobile phone data*. Landscape and Urban Planning, 191, 103642. DOI: https://doi.org/10.1016/j.landurbplan.2019.103642
+## 最简输入
 
-## 北京老年人经验阈值
+| 数据 | 必要字段 | 说明 |
+|---|---|---|
+| 研究单元和人口 | `unit_id`, `elderly_population`（列名可换） | 可以是网格或街道；可选 GeoJSON/GPKG 边界 |
+| 公园 | `park_id`, `park_area_ha` | 单位：公顷，必须有公园供给面积 |
+| 路网距离 | `unit_id`, `park_id`, `network_distance_km` | 与**当前研究单元**对应的公园最短路网距离（km） |
+| 距离阈值 | 程序参数 `thresholds` | 论文北京经验值、统一值、自定义公园大小分组或每公园单独值 |
 
-- 小型公园（2–20 ha）：5.3021 km
-- 中型公园（20–100 ha）：6.9710 km
-- 大型公园（>100 ha）：7.8076 km
+这里的“人口”是某研究单元内的**居住人口数（绝对人数）**，不是人口密度；分组计算时可以把 `population_column` 指向目标人群（例如老年人口）。输入网格则输出网格可达性；输入街道则输出街道可达性。**切换尺度时，路网距离也必须按新的单元重新准备**，不能只将网格结果简单平均当成街道计算值。
 
-这是特定样本的历史经验估计，不应当视为普适阈值。代码将20 ha划入中型，默认北京预设仅适用于面积大于2 ha的公园。
-
-## 安装与运行
+## 安装和运行
 
 ```bash
 pip install -e ".[test]"
-pytest -q
 python examples/run_demo.py
+pytest -q
 ```
 
-空间文件支持需要安装 `pip install -e ".[gis,test]"`。
+命令行直接输出网格可达性：
 
-## 数据
+```bash
+mobility2access \
+  --units data/synthetic/grids.csv \
+  --parks data/synthetic/parks.csv \
+  --distances data/synthetic/grid_road_distances.csv \
+  --population-column elderly_population \
+  --thresholds beijing2019_elderly \
+  --output outputs/grid_access.csv
+```
 
-1. 研究单元（`unit_id`、目标人口数量；可带 GeoDataFrame 几何）。
-2. 公园（`park_id`、`park_area_ha`，可附带 `threshold_km`）。
-3. 单元到公园的路网距离长表（`unit_id`、`park_id`、`network_distance_km`）。
-4. 距离阈值：北京经验值、统一数值、分规模字典或逐公园字段。
+换成街道单元，只需将 `--units` 换为 `data/synthetic/streets.csv`，将 `--distances` 换为 `data/synthetic/street_road_distances.csv`，输出改为 `outputs/street_access.csv`。
 
-既可以使用网格，也可以使用街道、社区，但人口数据与路网距离必须采用相同空间单元。**当前版本并不能根据边界自动计算路网距离**。
+空间文件：安装 `pip install -e ".[gis]"` 后，可将 `--units` 指向 `.geojson/.gpkg/.shp` 文件，将输出设为 `.geojson/.gpkg`；原有单元面要素和属性会一并保留。
 
-## 使用示例
+## Python 示例
 
 ```python
 import pandas as pd
@@ -42,19 +48,92 @@ from mobility2access import calculate_accessibility
 units = pd.read_csv("data/synthetic/grids.csv")
 parks = pd.read_csv("data/synthetic/parks.csv")
 distances = pd.read_csv("data/synthetic/grid_road_distances.csv")
+
 result = calculate_accessibility(
     units, parks, distances,
     population_column="elderly_population",
     thresholds="beijing2019_elderly",
 )
-print(result.units)
-print(result.gini)
+print(result.units)  # 每个研究单元新增 accessibility_m2_per_person
+print(result.parks)  # 每个公园的服务阈值、加权需求量、供需比
+print(result.gini)   # 按研究人群人口加权的基尼系数
 ```
 
-可以使用 `calibrate_thresholds(visits)` 对已经提取出的公园访问记录按年龄和公园规模统计出行网络距离75%分位数。该接口不处理原始手机信令轨迹。
+其他阈值使用方式：
 
-## 适用范围
+```python
+thresholds=5.0  # 所有公园统一5公里
+a = {"small":4.5, "medium":6.0, "large":8.0}
+thresholds=a    # 按公园规模使用自定义距离阈值
+thresholds="park_column"  # 从 parks 的 threshold_km 字段读取
+```
 
-这是一套论文核心方法的 Python 重构，**尚未通过原始数据证明完全复现原论文的所有结果**。附带数据完全为合成示例。模型使用传统 Gaussian 2SFCA 与 Gini，方法特色在于行为驱动的阈值标定。当前项目尚未确定软件开源许可证。
+### 原论文北京老年人（60岁及以上）经验参数
 
-详细参见 [方法说明](docs/METHOD.md) 和 [数据格式](docs/DATA_FORMAT.md)。
+| 公园规模 | 面积（ha） | 阈值（km） |
+|---|---|---:|
+| 小型 | 2–20 | 5.3021 |
+| 中型 | 20–100 | 6.9710 |
+| 大型 | 大于100 | 7.8076 |
+
+数据来自所附论文介绍文档图2。边界条件 20ha 被约定归为中型，`beijing2019_elderly` 模式限定公园面积必须 **>2 ha**。经验值用于当年北京老年人群体，其他地区/年龄段建议利用本地访问数据重新标定或输入自定义阈值。
+
+### 计算公式
+
+截断高斯权重：
+
+```
+w(d,D) = [exp(-0.5*(d/D)^2)-exp(-0.5)] / [1-exp(-0.5)]  (d<D)
+w(d,D) = 0                                                   (d>=D)
+R_j = S_j / sum_i(P_i * w_ij)
+A_i = sum_j(R_j * w_ij)
+```
+
+`S_j` 用 m²，`P_i` 用居民人数，最终 `A_i` 单位 m²/人。每个公园可以有独立的 `D_j`，而且两步使用同一阈值。无法接触服务人群的公园，其供需比在软件中设置为零并给予标记，这属于明确的工程处理约定。
+
+### 数据隐私和复现边界
+
+- `data/synthetic/` 下的公园、街道、网格、路网距离、轨迹统计均为**虚构演示数据**，并非论文的北京实际数据。
+- 已有距离阈值时**不需要**原始手机信令数据。`calibrate_thresholds()` 可利用提取后的公园访问路网距离表计算75%分位数，但**不直接提供**用户居住地识别、轨迹提取与公园访问识别模块。
+- 当前实现是核心 Gaussian 2SFCA + 阈值管理 + 人口加权 Gini；不包含论文全部回归分析或与原数据结果的逐项检验。
+- 使用不同人口与单元划分时，保证人口、路网距离及输出单元 ID 一致。公园实际入口及研究单元出发位置会影响距离结果。
+- 项目未添加 LICENSE。公开发布前请确认代码授权、合作单位权利，并添加引用文件。
+
+更完整的算法与不确定性说明：[docs/METHOD.md](docs/METHOD.md)，字段说明：[docs/DATA_FORMAT.md](docs/DATA_FORMAT.md)。
+
+## v0.2：从空间数据自动计算路网距离
+
+新增 `mobility2access.routing`，支持：
+
+- 输入网格、街道等研究单元的 GeoJSON/GeoPackage（需要 `unit_id` 和人口字段）、公园边界及其 `park_id` / `park_area_ha`。
+- 可选输入公园入口点（`park_id`，允许一园多入口）和研究单元实际人口中心点（`unit_id`）。
+- 使用已有的投影步行路网（NetworkX/OSMnx GraphML），也可通过 OSMnx 在线获取 OpenStreetMap 的步行路网。
+- 自动计算 **研究单元至公园入口的最短路网距离**，并按服务距离阈值筛选，直接调用原 Gaussian 2SFCA 模型。
+- 生成与原模型完全兼容的三列 OD 距离表、可达性图层及公园诊断结果。
+
+### 安装与离线演示
+
+```bash
+pip install -e ".[routing,test]"
+python examples/run_routing_demo.py
+pytest -q
+```
+
+### 真实 OpenStreetMap 步行路网（需要互联网）
+
+```bash
+pip install -e ".[osm,test]"
+mobility2access-route \
+  --units data/synthetic/grids.geojson \
+  --parks data/synthetic/parks.geojson \
+  --entrances data/synthetic/park_entrances.geojson \
+  --download-osm \
+  --population-column elderly_population \
+  --thresholds beijing2019_elderly \
+  --od-output outputs/od.csv \
+  --output outputs/accessibility.geojson
+```
+
+输入中的公园位置均为**人工合成示例**，不是北京市真实公园位置。对于全北京市研究，建议提前下载或准备完整路网，运行时改为 `--graphml path/to/network.graphml`；对于大型公园，应优先提供真实出入口。公园边界自动选取的最近路网位置仅是入口近似，节点吸附距离也是直线连接的近似，不能等同于真实步行路径。
+
+详见 [路网距离计算说明](docs/ROUTING.md)。
