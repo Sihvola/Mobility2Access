@@ -1,28 +1,57 @@
 # Mobility2Access
 
-**Behavior-informed spatial accessibility and equity analysis in Python.**
+**Behavior-informed park accessibility: park-size-dependent Gaussian 2SFCA with interchangeable study units.**
 
-Mobility2Access implements a Gaussian two-step floating catchment area (2SFCA) model with configurable service-distance thresholds, including age- and park-size-informed empirical thresholds from:
+This is a **runnable Python research-code reconstruction** of the core accessibility workflow in:
 
-> Guo, S., Song, C., Pei, T., et al. (2019). Accessibility to urban parks for elderly residents: Perspectives from mobile phone data. *Landscape and Urban Planning*, **191**, 103642. https://doi.org/10.1016/j.landurbplan.2019.103642
+> Guo, S., Song, C., Pei, T., et al. (2019). *Accessibility to urban parks for elderly residents: Perspectives from mobile phone data*. Landscape and Urban Planning, 191, 103642. https://doi.org/10.1016/j.landurbplan.2019.103642
 
-[中文说明](README.zh-CN.md)
+The original contribution is to **estimate distance catchments from observed home-to-park trips**, accounting for **population age and park size**, and then use those limits in the established Gaussian 2SFCA model. The Gini and Lorenz analyses characterize unequal access; these are established measures, not novel algorithms. This repository is not yet a validation against the original Beijing input data.
 
-## Why this tool?
+[中文说明 / Chinese guide](README.zh-CN.md) · [Scientific method](docs/METHOD.md) · [Input formats](docs/DATA_FORMAT.md)
 
-The classical Gaussian 2SFCA calculation and Gini index are established methods. The distinctive research idea behind this package is to **calibrate park catchment distances from observed visits**, accounting for age-related mobility and the attraction of different park sizes. The package also supports other populations and study units.
+## Core inputs: just four datasets / choices
 
-The study reported historical Beijing values for park visits by older adults (>=60): **5.3021 km** (small, 2–20 ha), **6.9710 km** (medium, 20–100 ha), and **7.8076 km** (large, >100 ha). Boundary handling in this software assigns 20 ha to medium. These are **empirical Beijing estimates, not universal standards**.
+1. **Study units** (`unit_id`, chosen `population` count; optional boundaries) — grid, street/subdistrict, neighborhood or another scale.
+2. **Parks** (`park_id`, `park_area_ha`) — park supply.
+3. **Shortest road-network distances** (`unit_id`, `park_id`, `network_distance_km`) — origin-to-park distance table for the selected study units.
+4. **Catchment distance threshold** — a Beijing 2019 size-dependent empirical profile, one common cutoff, custom size categories or park-specific values.
 
-## Install
+The **park area and road distance data are mathematically essential** even though users chiefly change the study-unit boundaries, population and thresholds. Raw phone data is **not** required when thresholds have already been estimated.
+
+## Install + run
 
 ```bash
-pip install -e ".[test]"
-pytest -q
+python -m pip install -e ".[test]"
 python examples/run_demo.py
+pytest -q
 ```
 
-For GeoJSON and GeoPackage input/output: `pip install -e ".[gis,test]"`.
+Run a user-ready CLI example with **completely synthetic data**:
+
+```bash
+mobility2access \
+  --units data/synthetic/grids.csv \
+  --parks data/synthetic/parks.csv \
+  --distances data/synthetic/grid_road_distances.csv \
+  --population-column elderly_population \
+  --thresholds beijing2019_elderly \
+  --output outputs/grid_access.csv
+```
+
+Use streets/subdistricts instead of grid cells (replace **both** unit population and corresponding unit-to-park road distances):
+
+```bash
+mobility2access \
+  --units data/synthetic/streets.csv \
+  --parks data/synthetic/parks.csv \
+  --distances data/synthetic/street_road_distances.csv \
+  --population-column elderly_population \
+  --thresholds beijing2019_elderly \
+  --output outputs/street_access.csv
+```
+
+To use boundary polygons and produce a spatial GeoPackage or GeoJSON, install `pip install -e ".[gis]"` and replace `--units` with `grids.geojson` or `streets.geojson` and `--output` with `outputs/accessibility.gpkg` or `outputs/accessibility.geojson`.
 
 ## Python API
 
@@ -32,61 +61,105 @@ from mobility2access import calculate_accessibility
 
 units = pd.read_csv("data/synthetic/grids.csv")
 parks = pd.read_csv("data/synthetic/parks.csv")
-od = pd.read_csv("data/synthetic/grid_road_distances.csv")
+network_distances = pd.read_csv("data/synthetic/grid_road_distances.csv")
 
 result = calculate_accessibility(
-    units, parks, od,
+    units, parks, network_distances,
     population_column="elderly_population",
     thresholds="beijing2019_elderly",
 )
 print(result.units[["unit_id", "accessibility_m2_per_person"]])
-print(result.parks[["park_id", "catchment_km"]])
-print(result.gini)
+print("Gini:", result.gini)
 ```
 
-### Required data
-
-- **Units**: `unit_id`, selected population column; optional geometry and metadata. Units can be grids or streets.
-- **Parks**: `park_id`, `park_area_ha`; optionally `threshold_km`.
-- **Distances (long OD table)**: `unit_id`, `park_id`, `network_distance_km`. Distances must match the chosen unit scale. Missing pairs mean unreachable.
-- **Thresholds**: `"beijing2019_elderly"`, a positive number in km, a `{"small": ..., "medium": ..., "large": ...}` mapping, or `"park_column"`.
-
-The software **does not currently generate road-network distances from geometries**. Calculate them separately before calling the model.
-
-## Command-line example
-
-```bash
-mobility2access \
-  --units data/synthetic/grids.csv \
-  --parks data/synthetic/parks.csv \
-  --distances data/synthetic/grid_road_distances.csv \
-  --population-column elderly_population \
-  --thresholds beijing2019_elderly \
-  --output outputs/grid_accessibility.csv
-```
-
-Outputs include unit accessibility (m²/person), park-level supply-to-demand diagnostics, population-weighted Lorenz data, and Gini.
-
-## Calibrate thresholds from preprocessed park visits
+Change the threshold with a single argument:
 
 ```python
-from mobility2access import calibrate_thresholds
-visits = pd.read_csv("data/synthetic/sample_park_visits.csv")
-print(calibrate_thresholds(visits, quantile=0.75))
+thresholds=5.0  # fixed 5 km for all parks
+thresholds={"small": 4.0, "medium": 6.0, "large": 8.0}
+thresholds="park_column"  # add `threshold_km` to every park row
 ```
 
-Each row must be an already-identified park visit with `age_group`, `park_area_ha`, and `network_distance_km`. The package does **not** process raw mobile-phone signaling trajectories or contain personal mobility data.
+For other age groups, cities or years, **calibrate new thresholds** or provide your own values. The Beijing preset is a historical empirical parameter for adults aged >=60, not an age-neutral standard.
 
-## Reproducibility and scope
+## Historical Beijing elder thresholds (km)
 
-- This is a **Python reconstruction of the core method**, not a verified numeric reproduction of every result reported in the original Beijing study.
-- Provided data are **synthetic** and should never be interpreted as observed visits or access in Beijing.
-- Gini is calculated using population-weighted individual accessibility; compare definitions carefully when reproducing published estimates.
-- Empty-demand park catchments are flagged and assigned a zero supply-to-demand ratio.
-- There is **no software license yet**. Do not assume that public visibility would grant reuse rights.
+| Park size | Park area (ha) | 75th percentile distance (km) |
+|---|---|---:|
+| Small | 2–20 | 5.3021 |
+| Medium | 20–100 | 6.9710 |
+| Large | >100 | 7.8076 |
 
-See [Method](docs/METHOD.md) and [Data format](docs/DATA_FORMAT.md).
+These figures come from Figure 2 of the supplied article explanation. Code assigns the boundary 20ha to medium; historical preset requires parks **over 2ha**. Check your new data's eligibility and calibration before applying them.
 
-## Citation
+## What the model outputs
 
-Please cite the original Guo et al. (2019) paper when using the research method. Software citation metadata can be added once attribution and licensing have been reviewed.
+For each input unit: `accessibility_m2_per_person` (m² park area per member of the selected population group). Park diagnostics include the actual cutoff, weighted demand and per-park supply ratio. It also returns population-weighted Gini and Lorenz curve values.
+
+The computational kernel handles **long-form OD edges**, rather than allocating a potentially enormous `number of units × number of parks` dense distance/weight matrix. It still requires a correct externally prepared road-network distance table.
+
+## Transparency / scientific limitations
+
+- **No raw mobile subscriber data are included.** Demo populations, GIS polygons, parks, visits and road distance values are all synthetic.
+- The project does not yet infer homes, parks visited, or trajectories from phone location timeseries; `calibrate_thresholds()` works on derived visit distances.
+- The main method is reconstructed using the supplied MATLAB algorithm, article description and author clarification. It is not certified to reproduce published maps or numerical summaries without original inputs.
+- Population-weighted Gini convention is stated in [docs/METHOD.md](docs/METHOD.md); it may differ from the published figure's exact calculation protocol.
+- **No license yet**: confirm intellectual property permissions and collaborators' roles before releasing as open source. Add a `LICENSE` and `CITATION.cff` before a public release. Until licensed, repository code is *not* automatically open-source licensed.
+
+## Recommended next checks
+
+Validate source routes and park entrances; check whether denominators should use total residents or target-group residents; benchmark accessible outputs against selected published numbers if data become available; confirm the original visits' 75% quantile protocol and 20ha boundary convention.
+
+## v0.2: Automatic walking-network distances from GIS inputs
+
+The new `mobility2access.routing` module converts **GeoDataFrames of grid/street units and parks** into the long-form road-distance table, then feeds it to Gaussian 2SFCA. Routing is based on an actual *network* rather than straight-line distance. You can reuse your own OSMnx/NetworkX graph offline or download a pedestrian graph using OSMnx and the Overpass API.
+
+### Install
+
+```bash
+pip install -e ".[routing,test]"        # offline routing with your own graph
+pip install -e ".[osm,test]"            # also supports OpenStreetMap download and GraphML
+python examples/run_routing_demo.py      # tiny offline graph; no network connection
+pytest -q
+```
+
+### One-step Python workflow
+
+```python
+import geopandas as gpd
+from mobility2access import calculate_from_geodata
+
+units = gpd.read_file("data/synthetic/grids.geojson")
+parks = gpd.read_file("data/synthetic/parks.geojson")
+entrances = gpd.read_file("data/synthetic/park_entrances.geojson")
+
+# With graph=None, the package obtains an OSM *walking* graph online.
+# Or provide graph=your_projected_osmnx_graph to work entirely offline.
+result, distances = calculate_from_geodata(
+    units, parks,
+    entrances=entrances,
+    population_column="elderly_population",
+    thresholds="beijing2019_elderly",
+)
+distances.to_csv("network_distances.csv", index=False)
+result.units.to_file("accessibility.geojson", driver="GeoJSON")
+```
+
+### Command line (no Python code needed)
+
+```bash
+# Requires network access and the [osm] extra:
+mobility2access-route \
+  --units data/synthetic/grids.geojson \
+  --parks data/synthetic/parks.geojson \
+  --entrances data/synthetic/park_entrances.geojson \
+  --download-osm \
+  --population-column elderly_population \
+  --thresholds beijing2019_elderly \
+  --od-output outputs/od.csv \
+  --output outputs/accessibility.geojson
+
+# Or replace --download-osm with --graphml /path/to/projected-walking.graphml.
+```
+
+**Method details and important limitations:** [Road network workflow](docs/ROUTING.md). The included GIS layers are **synthetic, not actual Beijing park locations**. Downloading OSM data depends on Overpass availability and can be expensive or fail for large Beijing-wide areas. For city-scale work, prepare and reuse an appropriately projected, sufficiently buffered pedestrian network. Entrance points are strongly recommended; without them polygon boundaries are approximated by the nearest network node. Connector distances between geometries and snapped nodes are straight lines and not guaranteed walkable. No real OSM network download is executed by the CI tests.
