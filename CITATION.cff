@@ -1,0 +1,50 @@
+cff-version: 1.2.0
+message: >-
+  If you use Mobility2Access, please cite the software and the Guo et al. (2019)
+  research article describing the behavior-informed park accessibility method.
+title: "Mobility2Access: Behavior-informed spatial accessibility and equity analysis"
+type: software
+authors:
+  - family-names: Guo
+    given-names: Sihui
+version: 0.2.0
+repository-code: "https://github.com/Sihvola/Mobility2Access"
+url: "https://github.com/Sihvola/Mobility2Access"
+license: BSD-3-Clause
+keywords:
+  - spatial accessibility
+  - two-step floating catchment area
+  - Gaussian 2SFCA
+  - human mobility
+  - park accessibility
+  - spatial equity
+references:
+  - type: article
+    authors:
+      - family-names: Guo
+        given-names: Sihui
+      - family-names: Song
+        given-names: Ci
+      - family-names: Pei
+        given-names: Tao
+      - family-names: Liu
+        given-names: Yaxi
+      - family-names: Ma
+        given-names: Ting
+      - family-names: Du
+        given-names: Yunyan
+      - family-names: Chen
+        given-names: Jie
+      - family-names: Fan
+        given-names: Zide
+      - family-names: Tang
+        given-names: Xianli
+      - family-names: Peng
+        given-names: Yong
+      - family-names: Wang
+        given-names: Yanbin
+    title: "Accessibility to urban parks for elderly residents: Perspectives from mobile phone data"
+    journal: "Landscape and Urban Planning"
+    volume: "191"
+    year: 2019
+    doi: "10.1016/j.landurbplan.2019.103642"
