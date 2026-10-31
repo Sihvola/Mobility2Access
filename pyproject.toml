@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mobility2access"
-version = "0.1.0"
+version = "0.2.0"
 description = "Behavior-informed Gaussian 2SFCA park accessibility and spatial equity analysis"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -14,12 +14,19 @@ classifiers = [
   "Programming Language :: Python :: 3",
   "Topic :: Scientific/Engineering :: GIS",
 ]
+
 [project.optional-dependencies]
 gis = ["geopandas>=0.14"]
+routing = ["geopandas>=0.14", "networkx>=3", "scipy>=1.10", "shapely>=2"]
+osm = ["geopandas>=0.14", "networkx>=3", "scipy>=1.10", "shapely>=2", "osmnx>=2.0"]
 test = ["pytest>=7"]
+
 [project.scripts]
 mobility2access = "mobility2access.cli:main"
+mobility2access-route = "mobility2access.route_cli:main"
+
 [tool.setuptools.packages.find]
 where = ["src"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
