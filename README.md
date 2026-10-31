@@ -104,7 +104,19 @@ The computational kernel handles **long-form OD edges**, rather than allocating 
 - The project does not yet infer homes, parks visited, or trajectories from phone location timeseries; `calibrate_thresholds()` works on derived visit distances.
 - The main method is reconstructed using the supplied MATLAB algorithm, article description and author clarification. It is not certified to reproduce published maps or numerical summaries without original inputs.
 - Population-weighted Gini convention is stated in [docs/METHOD.md](docs/METHOD.md); it may differ from the published figure's exact calculation protocol.
-- **No license yet**: confirm intellectual property permissions and collaborators' roles before releasing as open source. Add a `LICENSE` and `CITATION.cff` before a public release. Until licensed, repository code is *not* automatically open-source licensed.
+- The **source code is available under BSD-3-Clause** (see [LICENSE](LICENSE)). The research article and third-party datasets have their own separate copyright and licensing terms.
+
+## License, citation and OpenStreetMap attribution
+
+**Software license.** Mobility2Access source code is released under the [BSD 3-Clause License](LICENSE) (Copyright © 2026 Sihui Guo and Mobility2Access contributors). This software license covers the repository's original code; it does **not** relicense the 2019 journal article or third-party datasets.
+
+**Citing this work.** GitHub's **Cite this repository** feature uses [CITATION.cff](CITATION.cff) to generate a software citation for **Mobility2Access v0.2.0**. When publishing results based on the behavior-informed threshold method, **also cite the original research article**:
+
+> Guo, S., Song, C., Pei, T., et al. (2019). Accessibility to urban parks for elderly residents: Perspectives from mobile phone data. *Landscape and Urban Planning*, 191, 103642. https://doi.org/10.1016/j.landurbplan.2019.103642
+
+The software currently has **no separately registered DOI or official GitHub Release**; do not use the paper DOI as a software DOI.
+
+**OpenStreetMap and third-party data.** The optional OSMnx workflow downloads and uses data from **© OpenStreetMap contributors**, available under the [Open Database License (ODbL)](https://www.openstreetmap.org/copyright). When distributing OSM-derived geographic datasets, maps or other produced works, comply with the ODbL and [OSM attribution guidance](https://osmfoundation.org/wiki/Attribution_Guidelines), including the required credit and any applicable share-alike obligations. The BSD-3-Clause license of *this code* does not replace ODbL for OSM data. The bundled demo files are **synthetic** and do not contain a downloaded OSM network.
 
 ## Recommended next checks
 
