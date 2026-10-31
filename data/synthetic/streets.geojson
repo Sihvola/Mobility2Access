@@ -1,0 +1,110 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "unit_id": "S01",
+        "elderly_population": 200,
+        "total_population": 810
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.32,
+              39.88
+            ],
+            [
+              116.329,
+              39.88
+            ],
+            [
+              116.329,
+              39.898
+            ],
+            [
+              116.32,
+              39.898
+            ],
+            [
+              116.32,
+              39.88
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "unit_id": "S02",
+        "elderly_population": 200,
+        "total_population": 840
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.329,
+              39.88
+            ],
+            [
+              116.338,
+              39.88
+            ],
+            [
+              116.338,
+              39.898
+            ],
+            [
+              116.329,
+              39.898
+            ],
+            [
+              116.329,
+              39.88
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "unit_id": "S03",
+        "elderly_population": 115,
+        "total_population": 590
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.338,
+              39.88
+            ],
+            [
+              116.347,
+              39.88
+            ],
+            [
+              116.347,
+              39.898
+            ],
+            [
+              116.338,
+              39.898
+            ],
+            [
+              116.338,
+              39.88
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}
